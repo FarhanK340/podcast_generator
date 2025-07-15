@@ -148,6 +148,10 @@ def main():
     save_script(script_text, args.output_script_file)
 
     parsed_script = parse_script(script_text)
+    
+    if len(parsed_script) != 6:
+        print(f"Error: Expected 6 lines of dialogue, got {len(parsed_script)}.")
+        sys.exit(1)
 
     generate_audio(parsed_script, args.host_voice, args.guest_voice, args.output_audio_file)
 
