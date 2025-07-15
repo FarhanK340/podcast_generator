@@ -139,6 +139,7 @@ def generate_audio(dialogue, host_voice, guest_voice, output_file):
     print(f"Final audio saved to {output_file}")
 
 def main():
+    print("Starting AI Podcast Generation...")
     args = parse_args()
     validate_api_keys(args.llm_provider)
 
