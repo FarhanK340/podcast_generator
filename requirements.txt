@@ -1,0 +1,4 @@
+python-dotenv
+pydub
+elevenlabs
+requests
