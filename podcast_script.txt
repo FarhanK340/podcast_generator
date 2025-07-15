@@ -1,0 +1,6 @@
+HOST: As AI surveillance technology becomes increasingly advanced, we're seeing it used more frequently in public spaces, from malls to streets.
+GUEST: But with this increased surveillance comes new ethical questions about privacy and civil liberties.
+HOST: Some argue that AI surveillance can actually help keep us safer, by allowing for more effective crime prevention and detection.
+GUEST: However, I believe that the benefits of AI surveillance are far outweighed by the risks, which include the potential for misuse and loss of personal freedom.
+HOST: What about the notion that AI surveillance can be used to identify and track marginalized groups?
+GUEST: This is exactly what worries me, as AI surveillance can perpetuate existing biases and discrimination, particularly for already vulnerable populations.
