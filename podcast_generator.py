@@ -34,7 +34,7 @@ def parse_args():
                         default="podcast.mp3", help="Output audio file name")
     parser.add_argument("--output_script_file",
                         default="podcast_script.txt", help="Output script text file")
-    parser.add_argument("--llm_model", default="gpt-4o",
+    parser.add_argument("--llm_model", default="llama3-8b-8192",
                         help="LLM model to use")
     parser.add_argument("--llm_provider", default="grok",
                         choices=["grok"], help="LLM API provider")
@@ -118,7 +118,8 @@ def generate_audio(dialogue, host_voice, guest_voice, output_file):
             )
 
             with tempfile.NamedTemporaryFile(delete=True, suffix=".mp3") as tf:
-                tf.write(audio_stream.read())
+                for chunk in audio_stream:
+                    tf.write(chunk)
                 tf.flush()
                 segment = AudioSegment.from_file(tf.name, format="mp3")
                 audio_segments.append(segment)
