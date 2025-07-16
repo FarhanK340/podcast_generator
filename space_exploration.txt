@@ -1,0 +1,6 @@
+HOST: As we continue to push the boundaries of space exploration, what new frontiers are on the horizon?
+GUEST: The moon is a prime destination, with NASA's Artemis program aiming to return humans to the lunar surface by 2024.
+HOST: And what about Mars, are we any closer to sending humans to the red planet?
+GUEST: Mars is a tough one, but NASA's Perseverance rover has given us valuable insights into the planet's habitability and geology.
+HOST: That's right, and private companies like SpaceX and Blue Origin are also making significant strides in space exploration.
+GUEST: Indeed, with reusable rockets and commercial space stations, the private sector is playing a crucial role in advancing our understanding of space.
