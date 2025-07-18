@@ -8,11 +8,14 @@ from dotenv import load_dotenv
 from pydub import AudioSegment
 from elevenlabs.client import ElevenLabs
 
+load_dotenv()
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+
+
 
 def generate_script_grok(topic: str, llm_model: str) -> str:
 
-    load_dotenv()
-    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
     print("Generating script using Groq...")
     prompt = (
@@ -42,39 +45,35 @@ def generate_script_grok(topic: str, llm_model: str) -> str:
         sys.exit(1)
 
 
-def parse_script(script_text: str) -> list[dict]:
+def parse_script(script_text: str) -> list[dict[str, str]]:
     print("Parsing script...")
+    
     lines = script_text.strip().splitlines()
-    parsed = []
-    for line in lines:
-        match = re.match(r"^(HOST|GUEST):\s*(.+)", line.strip())
-        if match:
-            speaker, text = match.groups()
-            parsed.append({"speaker": speaker.upper(), "text": text.strip()})
-    if len(parsed) != 6:
-        print(f"Error: Expected 6 lines of dialogue, got {len(parsed)}.")
-        sys.exit(1)
-    return parsed
+    segments = []
 
+    for idx, line in enumerate(lines, 1):
+        line = line.strip()
+        if line.startswith("HOST:"):
+            segments.append({"speaker": "host", "text": line[5:].strip()})
+        elif line.startswith("GUEST:"):
+            segments.append({"speaker": "guest", "text": line[6:].strip()})
+        else:
+            print(f"Warning: Line {idx} is not labeled correctly and was skipped.")
 
-def save_script(script_text, filename):
-    try:
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(script_text)
-        print(f"Saved script to {filename}")
-    except Exception as e:
-        print(f"Error saving script: {e}")
-        sys.exit(1)
+    if not segments:
+        raise ValueError("No valid HOST or GUEST lines found in the script.")
+    if len(segments) < 6:
+        print(f"Warning: Expected at least 6 lines of dialogue, but got {len(segments)}.")
+
+    return segments
 
 
 def generate_and_combine_audio_from_segments(
-        dialogue_segments: dict,
+        dialogue_segments: list[dict[str, str]],
         host_voice_id: str,
         guest_voice_id: str,
         output_audio_path: str) -> None:
 
-    load_dotenv()
-    ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
     client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
     audio_segments = []
 
