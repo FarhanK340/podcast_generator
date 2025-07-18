@@ -1,0 +1,6 @@
+HOST: Welcome to the show, today we're discussing the role of AI as a teacher. How do you think AI can impact the way we learn?
+GUEST: Well, AI can provide personalized learning experiences tailored to each student's needs, pace, and learning style.
+HOST: That's fascinating. Can you share an example of an AI-powered learning platform you've come across?
+GUEST: One example is an AI-driven math curriculum that adaptively adjusts difficulty levels based on student performance.
+HOST: Wow, that sounds incredibly effective. How do you think AI can supplement traditional teaching methods?
+GUEST: By freeing up human teachers to focus on more hands-on, creative aspects of education, allowing them to build stronger relationships with students.

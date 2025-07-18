@@ -1,51 +1,22 @@
-import argparse
+# import argparse
 import os
 import sys
 import re
 import tempfile
+import requests
 from dotenv import load_dotenv
 from pydub import AudioSegment
 from elevenlabs.client import ElevenLabs
 
-import requests
-
-# Load environment variables
 load_dotenv()
-ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 
-def validate_api_keys(provider):
-    missing_keys = []
-    if provider == "grok" and not GROQ_API_KEY:
-        missing_keys.append("GROQ_API_KEY")
-    if not ELEVENLABS_API_KEY:
-        missing_keys.append("ELEVENLABS_API_KEY")
-    if missing_keys:
-        print(
-            f"Error: Missing API keys: {', '.join(missing_keys)} in .env file.")
-        sys.exit(1)
+
+def generate_script_grok(topic: str, llm_model: str) -> str:
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Generate an AI podcast.")
-    parser.add_argument("--topic", "-t", required=True, help="Podcast topic")
-    parser.add_argument("--output_audio_file",
-                        default="podcast.mp3", help="Output audio file name")
-    parser.add_argument("--output_script_file",
-                        default="podcast_script.txt", help="Output script text file")
-    parser.add_argument("--llm_model", default="llama3-8b-8192",
-                        help="LLM model to use")
-    parser.add_argument("--llm_provider", default="grok",
-                        choices=["grok"], help="LLM API provider")
-    parser.add_argument("--host_voice", default="21m00Tcm4TlvDq8ikWAM",
-                        help="Eleven Labs voice ID for host")
-    parser.add_argument("--guest_voice", default="AZnzlk1XvdvUeBnXmlld",
-                        help="Eleven Labs voice ID for guest")
-    return parser.parse_args()
-
-
-def generate_script_grok(topic, model):
     print("Generating script using Groq...")
     prompt = (
         f"Create a podcast script on the topic: '{topic}'.\n"
@@ -62,7 +33,7 @@ def generate_script_grok(topic, model):
             {"role": "system", "content": "You are a professional podcast script writer."},
             {"role": "user", "content": prompt}
         ],
-        "model": model
+        "model": llm_model
     }
     try:
         response = requests.post(
@@ -74,39 +45,42 @@ def generate_script_grok(topic, model):
         sys.exit(1)
 
 
-def parse_script(script_text):
+def parse_script(script_text: str) -> list[dict[str, str]]:
     print("Parsing script...")
+    
     lines = script_text.strip().splitlines()
-    parsed = []
-    for line in lines:
-        match = re.match(r"^(HOST|GUEST):\s*(.+)", line.strip())
-        if match:
-            speaker, text = match.groups()
-            parsed.append({"speaker": speaker.upper(), "text": text.strip()})
-    if len(parsed) != 6:
-        print(f"Error: Expected 6 lines of dialogue, got {len(parsed)}.")
-        sys.exit(1)
-    return parsed
+    segments = []
+
+    for idx, line in enumerate(lines, 1):
+        line = line.strip()
+        if line.startswith("HOST:"):
+            segments.append({"speaker": "host", "text": line[5:].strip()})
+        elif line.startswith("GUEST:"):
+            segments.append({"speaker": "guest", "text": line[6:].strip()})
+        else:
+            print(f"Warning: Line {idx} is not labeled correctly and was skipped.")
+
+    if not segments:
+        raise ValueError("No valid HOST or GUEST lines found in the script.")
+    if len(segments) < 6:
+        print(f"Warning: Expected at least 6 lines of dialogue, but got {len(segments)}.")
+
+    return segments
 
 
-def save_script(script_text, filename):
-    try:
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(script_text)
-        print(f"Saved script to {filename}")
-    except Exception as e:
-        print(f"Error saving script: {e}")
-        sys.exit(1)
+def generate_and_combine_audio_from_segments(
+        dialogue_segments: list[dict[str, str]],
+        host_voice_id: str,
+        guest_voice_id: str,
+        output_audio_path: str) -> None:
 
-
-def generate_audio(dialogue, host_voice, guest_voice, output_file):
     client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
     audio_segments = []
 
-    for idx, line in enumerate(dialogue):
+    for idx, line in enumerate(dialogue_segments):
         speaker = line["speaker"]
         text = line["text"]
-        voice_id = host_voice if speaker == "HOST" else guest_voice
+        voice_id = host_voice_id if speaker == "HOST" else guest_voice_id
 
         try:
             print(f"Generating audio for {speaker} line {idx + 1}...")
@@ -136,25 +110,6 @@ def generate_audio(dialogue, host_voice, guest_voice, output_file):
     for segment in audio_segments[1:]:
         final_audio += segment
 
-    final_audio.export(output_file, format=output_file.split('.')[-1])
-    print(f"Final audio saved to {output_file}")
-
-def main():
-    print("Starting AI Podcast Generation...")
-    args = parse_args()
-    validate_api_keys(args.llm_provider)
-
-    script_text = generate_script_grok(args.topic, args.llm_model)
-
-    save_script(script_text, args.output_script_file)
-
-    parsed_script = parse_script(script_text)
-    
-    if len(parsed_script) != 6:
-        print(f"Error: Expected 6 lines of dialogue, got {len(parsed_script)}.")
-        sys.exit(1)
-
-    generate_audio(parsed_script, args.host_voice, args.guest_voice, args.output_audio_file)
-
-if __name__ == "__main__":
-    main()
+    final_audio.export(output_audio_path,
+                       format=output_audio_path.split('.')[-1])
+    print(f"Final audio saved to {output_audio_path}")
