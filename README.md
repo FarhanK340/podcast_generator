@@ -11,8 +11,8 @@ Make sure Python 3.9+ is installed.
 Clone the repo and install dependencies:
 
 ```bash
-git clone https://github.com/your-username/ai-podcast-generator.git
-cd ai-podcast-generator
+git clone https://github.com/FarhanK340/podcast_generator.git
+cd podcast_generator
 pip install -r requirements.txt
 ```
 
@@ -21,13 +21,12 @@ pip install -r requirements.txt
 `
 GROQ_API_KEY=your_groq_api_key
 ELEVENLABS_API_KEY=your_elevenlabs_api_key
-ELEVENLABS_VOICE_ID=your_voice_id
 `
 
 ## 3. Run the FastAPI Server
 
 ```bash
-uvicorn podcast_generator.main:app --reload
+uvicorn main_api:app --reload
 ```
 
 This will start the app at:
@@ -43,7 +42,7 @@ Use the Swagger UI to test your API interactively by uploading a topic. The API 
 
 ## Project Structure
 
-```
+```graphql
 podcast_generator/
 │
 ├── main_api.py             # FastAPI app entry point
@@ -53,4 +52,4 @@ podcast_generator/
 ├── generated_scripts/      # List of old generated script files
 └── .env                    # Your API keys (not committed)
 └── README.md                    # Readme file for executing the project
-```
+`
