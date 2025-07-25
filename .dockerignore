@@ -1,0 +1,7 @@
+.env
+__pycache__/
+.pyc
+venv/
+generated_audios/*.mp3
+generated_audios/*.wav
+generated_scripts/*.txt
